@@ -1,14 +1,19 @@
 import pygame
+import random
 from typing import List
 
 from color import Color
 from direction import Direction
 from dog_leg_lf import DogLegLf
 from dog_leg_rt import DogLegRt
+from ess import Ess
 from heading import Heading
+from i_beam import IBeam
 from shape import Shape
 from square import Square
+from tee import Tee
 from tile import Tile
+from zee import Zee
 
 class Board():
 
@@ -17,7 +22,7 @@ class Board():
     LEVEL_SPEED: List[float] = [0.8, 0.7, 0.6, 0.5]
     GRID = (10, 22)
     TILE_SIZE = 32
-    PIECES: List[Shape] = [DogLegRt(), DogLegLf(), Square()]
+    BAG: List[Shape] = [DogLegRt(), DogLegLf(), Square(), Zee(), Tee(), Ess(), IBeam()]
 
     def __init__(self, size: tuple, font):
         self.size = size
@@ -33,10 +38,11 @@ class Board():
         for i in range(0, self.GRID[0] * self.GRID[1]):
             self.grid.append(Tile(aid = i))
 
-        self.current_piece = 0
         self.current_orientation = 0
         self.current_piece_origin = (3, 0)
-        self.piece = self.PIECES[self.current_piece]
+        random.shuffle(self.BAG)
+        self.pieces: List[Shape] = self.BAG
+        self.piece = self.pieces.pop()
 
     def set_new_piece(self):
         color = self.piece.color
@@ -47,9 +53,11 @@ class Board():
             row = (int(cell / 4)) + y
             self.grid[row * self.GRID[0] + col].color = color
 
-        self.current_piece += 1
-        self.current_piece %= len(self.PIECES)
-        self.piece = self.PIECES[self.current_piece]
+        if not self.pieces:
+            random.shuffle(self.BAG)
+            self.pieces = self.BAG
+
+        self.piece = self.pieces.pop()
         self.current_piece_origin = (3, 0)
 
     def toggle_grid_lines(self):
@@ -111,6 +119,14 @@ class Board():
         
         self.current_orientation = orientation 
 
+    def draw(self, surface: pygame.Surface):
+        self._draw_cells(surface)
+
+        pygame.draw.rect(surface, self.BG_COLOR, self.boarder, 2, border_radius=1)
+        pygame.draw.rect(surface, self.BG_COLOR, self.preview, 2, border_radius=1)
+
+        self._draw_piece(surface)
+
     def _can_rotate(self, col: int, row: int) -> bool:
         can_rotate = True
         if col < 0 or col > 9:
@@ -151,12 +167,4 @@ class Board():
                 y = (grid_row * self.TILE_SIZE) + self.grid_origin[1]
                 rect = pygame.Rect(x + 1, y + 1, self.TILE_SIZE - 4, self.TILE_SIZE - 4)
                 pygame.draw.rect(surface, self.piece.color, rect)
-
-    def draw(self, surface: pygame.Surface):
-        self._draw_cells(surface)
-
-        pygame.draw.rect(surface, self.BG_COLOR, self.boarder, 2, border_radius=1)
-        pygame.draw.rect(surface, self.BG_COLOR, self.preview, 2, border_radius=1)
-
-        self._draw_piece(surface)
 
