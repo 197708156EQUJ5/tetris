@@ -9,7 +9,7 @@ from dog_leg_rt import DogLegRt
 from ess import Ess
 from heading import Heading
 from i_beam import IBeam
-from score import Score
+from game_stats import GameStats
 from shape import Shape
 from square import Square
 from tee import Tee
@@ -23,6 +23,7 @@ class Board():
     LEVEL_SPEED: List[float] = [0.8, 0.7, 0.6, 0.5]
     GRID = (10, 22)
     TILE_SIZE = 32
+    TILE_PREVIEW_SIZE = 24
     BAG: List[Shape] = [DogLegRt(), DogLegLf(), Square(), Zee(), Tee(), Ess(), IBeam()]
 
     def __init__(self, size: tuple, font):
@@ -30,13 +31,13 @@ class Board():
         self.font = font
         self.grid_origin = (self.INSET, 0 - self.TILE_SIZE)
         self.boarder_coords = (self.INSET - 3, self.INSET, 326, 645)
-        preview_coords = ((2 * size[0] // 3) + self.INSET, self.INSET, 125, 125)
+        self.preview_coords = ((2 * size[0] // 3) + self.INSET, self.INSET, 125, 125)
         self.level_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 10)
-        self.lines_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 30)
+        self.lines_cleared_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 30)
         self.score_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 50)
         self.boarder = pygame.Rect(self.boarder_coords)
-        self.preview = pygame.Rect(preview_coords)
-        self.score = Score()
+        self.preview = pygame.Rect(self.preview_coords)
+        self.game_stats = GameStats()
         self.show_grid_lines = False
         self.grid: List[Tile] = []
         for i in range(0, self.GRID[0] * self.GRID[1]):
@@ -44,9 +45,10 @@ class Board():
 
         self.current_orientation = 0
         self.current_piece_origin = (3, 0)
+        self.preview_origin = (14, 3)
         self.pieces: List[Shape] = []
         self._load_pieces()
-        self.piece = self.pieces.pop()
+        self.piece = self.pieces.pop(0)
 
     def _load_pieces(self):
         random.shuffle(self.BAG)
@@ -62,10 +64,10 @@ class Board():
             row = (int(cell / 4)) + y
             self.grid[row * self.GRID[0] + col].color = color
 
-        if self.pieces == []:
+        if len(self.pieces) < 2:
             self._load_pieces()
 
-        self.piece = self.pieces.pop()
+        self.piece = self.pieces.pop(0)
         self.current_piece_origin = (3, 0)
 
     def toggle_grid_lines(self):
@@ -178,7 +180,8 @@ class Board():
         pygame.draw.rect(surface, self.BG_COLOR, self.preview, 2, border_radius=1)
 
         self._draw_piece(surface)
-        self._draw_score(surface)
+        self._draw_preview(surface)
+        self._draw_game_stats(surface)
 
     def _draw_cells(self, surface: pygame.Surface):
         i: int = 0
@@ -209,19 +212,33 @@ class Board():
                 pygame.draw.rect(surface, color, rect)
                 pygame.draw.rect(surface, self.piece.color, rect, 2, border_radius=2)
 
-    def _draw_score(self, surface: pygame.Surface):
+    def _draw_preview(self, surface: pygame.Surface):
+        preview_piece = self.pieces[0]
+        for cell in range(0, 15):
+            if cell in preview_piece.get_shape(0):
+                grid_col = self.preview_origin[0] + int((cell % 4))
+                grid_row = self.preview_origin[1] + int((cell / 4))
+                x = (grid_col * self.TILE_PREVIEW_SIZE) + self.grid_origin[0]
+                y = (grid_row * self.TILE_PREVIEW_SIZE) + self.grid_origin[1]
+                rect = pygame.Rect(x + 125, y + 15, self.TILE_PREVIEW_SIZE, self.TILE_PREVIEW_SIZE)
+                piece_color = preview_piece.color
+                color = pygame.Color(int(piece_color[0] * 0.5), int(piece_color[1] * 0.5), int(piece_color[2] * 0.5))
+                pygame.draw.rect(surface, color, rect)
+                pygame.draw.rect(surface, piece_color, rect, 2, border_radius=2)
+
+    def _draw_game_stats(self, surface: pygame.Surface):
         level_label_text = self.font.render("Level:", True, Color.GREEN)
-        level_text = self.font.render(str(self.score.level), True, Color.WHITE)
+        level_text = self.font.render(str(self.game_stats.level), True, Color.WHITE)
         rect = surface.blit(level_label_text, self.level_label_coords)
         surface.blit(level_text, (rect.x + rect.width + 5, rect.y))
 
-        lines_label_text = self.font.render("Lines:", True, Color.GREEN)
-        lines_text = self.font.render(str(self.score.lines), True, Color.WHITE)
-        rect = surface.blit(lines_label_text, self.lines_label_coords)
-        surface.blit(lines_text, (rect.x + rect.width + 5, rect.y))
+        lines_cleared_label_text = self.font.render("Lines Cleared:", True, Color.GREEN)
+        lines_cleared_text = self.font.render(str(self.game_stats.lines_cleared), True, Color.WHITE)
+        rect = surface.blit(lines_cleared_label_text, self.lines_cleared_label_coords)
+        surface.blit(lines_cleared_text, (rect.x + rect.width + 5, rect.y))
 
         score_label_text = self.font.render("Score:", True, Color.GREEN)
-        score_text = self.font.render(str(self.score.score), True, Color.WHITE)
+        score_text = self.font.render(str(self.game_stats.score), True, Color.WHITE)
         rect = surface.blit(score_label_text, self.score_label_coords)
         surface.blit(score_text, (rect.x + rect.width + 5, rect.y))
 

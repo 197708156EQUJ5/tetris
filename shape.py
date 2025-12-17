@@ -16,3 +16,6 @@ class Shape():
     def color(self) -> Color:
         return self._color
 
+    def __str__(self):
+        return f"{self.__class__.__name__}"
+
