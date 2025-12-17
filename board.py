@@ -1,6 +1,7 @@
 import pygame
 from typing import List
 
+from renderer import BoardRenderer
 from color import Color
 from direction import Direction
 from game_stats import GameStats
@@ -31,8 +32,10 @@ class Board():
         self.border_rect = pygame.Rect(self.border_coords)
         self.preview_rect = pygame.Rect(self.preview_coords)
         self.game_stats = GameStats()
-        self.show_grid_lines = False
         self.cols, self.rows = self.GRID
+        self.renderer = BoardRenderer(font=self.font, cols=self.cols, rows=self.rows, inset=self.INSET,
+            tile_size=self.TILE_SIZE, preview_tile_size=self.TILE_PREVIEW_SIZE, bg_color=self.BG_COLOR)        
+        self.show_grid_lines = False
         self.grid = Grid(self.cols, self.rows)
 
         self.active_orientation = 0
@@ -127,14 +130,21 @@ class Board():
         self.grid.cells = temp_grid
 
     def draw(self, surface: pygame.Surface):
-        self._draw_cells(surface)
+        self.renderer.draw(surface, cells=self.grid.cells, active_piece=self.active_piece, active_origin=self.active_origin,
+            active_orientation=self.active_orientation, next_piece=self.bag.peek(), show_grid_lines=self.show_grid_lines,
+            border_rect=self.border_rect, preview_rect=self.preview_rect, preview_origin=self.preview_origin,
+            stats=self.game_stats, level_label_pos=self.level_label_coords, lines_label_pos=self.lines_cleared_label_coords,
+            score_label_pos=self.score_label_coords)
 
-        pygame.draw.rect(surface, self.BG_COLOR, self.border_rect, 2, border_radius=1)
-        pygame.draw.rect(surface, self.BG_COLOR, self.preview_rect, 2, border_radius=1)
-
-        self._draw_piece(surface)
-        self._draw_preview(surface)
-        self._draw_game_stats(surface)
+#    def draw(self, surface: pygame.Surface):
+#        self._draw_cells(surface)
+#
+#        pygame.draw.rect(surface, self.BG_COLOR, self.border_rect, 2, border_radius=1)
+#        pygame.draw.rect(surface, self.BG_COLOR, self.preview_rect, 2, border_radius=1)
+#
+#        self._draw_piece(surface)
+#        self._draw_preview(surface)
+#        self._draw_game_stats(surface)
 
     def _draw_cells(self, surface: pygame.Surface):
         i: int = 0
