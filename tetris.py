@@ -51,6 +51,7 @@ class App:
 
                 if not can_move:
                     self.board.set_new_piece()
+                    self.board.remove_lines()
             
             self.handle_events()
             self.draw()
@@ -90,6 +91,7 @@ class App:
             self.board.toggle_grid_lines()
 
         if not can_move:
+            self.board.remove_lines()
             self.board.set_new_piece()
 
     def handle_mouse_down(self, event: pygame.event.Event):

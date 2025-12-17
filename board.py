@@ -40,9 +40,14 @@ class Board():
 
         self.current_orientation = 0
         self.current_piece_origin = (3, 0)
-        random.shuffle(self.BAG)
-        self.pieces: List[Shape] = self.BAG
+        self.pieces: List[Shape] = []
+        self._load_pieces()
         self.piece = self.pieces.pop()
+
+    def _load_pieces(self):
+        random.shuffle(self.BAG)
+        for shape in self.BAG:
+            self.pieces.append(shape)
 
     def set_new_piece(self):
         color = self.piece.color
@@ -53,9 +58,8 @@ class Board():
             row = (int(cell / 4)) + y
             self.grid[row * self.GRID[0] + col].color = color
 
-        if not self.pieces:
-            random.shuffle(self.BAG)
-            self.pieces = self.BAG
+        if self.pieces == []:
+            self._load_pieces()
 
         self.piece = self.pieces.pop()
         self.current_piece_origin = (3, 0)
@@ -118,6 +122,33 @@ class Board():
                 return 
         
         self.current_orientation = orientation 
+
+    def remove_lines(self):
+        delete_rows: List[int] = []
+        col_counter = 0
+
+        for i, cell in enumerate(self.grid):
+            col = i % 10
+            row = i // 10
+
+            if col == 0:
+                col_counter = 0
+            if cell.color != Color.BLACK:
+                col_counter += 1
+            if col == 9:
+                if col_counter == 10:
+                    delete_rows.append(row)
+
+        temp_grid: List[Tile] = []
+        for i, cell in enumerate(self.grid):
+            row = int(i / 10)
+            if not row in delete_rows:
+                temp_grid.append(cell)
+
+        for _ in range(0, len(delete_rows) * 10):
+            temp_grid.insert(0, Tile())
+
+        self.grid = temp_grid
 
     def draw(self, surface: pygame.Surface):
         self._draw_cells(surface)
