@@ -47,7 +47,7 @@ class Board():
         y = self.active_origin[1]
         for cell in self.active_piece.get_shape(self.active_orientation):
             col = (cell % 4) + x
-            row = (int(cell / 4)) + y
+            row = (cell // 4) + y
             self.grid.set_cell_color(col, row, color)
 
         self.active_piece = self.bag.next()
@@ -117,7 +117,7 @@ class Board():
 
         temp_grid: List[Tile] = []
         for i, cell in enumerate(self.grid.cells):
-            row = int(i / 10)
+            row = i // 10
             if not row in delete_rows:
                 temp_grid.append(cell)
 
@@ -141,7 +141,7 @@ class Board():
         for tile in self.grid.cells:
             x = (i % self.cols) * self.TILE_SIZE + self.INSET
             y = ((i // self.cols) * self.TILE_SIZE) - self.TILE_SIZE
-            tile_count = int(i / self.cols)
+            tile_count = i // self.cols
             rect = pygame.Rect(x, y, self.TILE_SIZE, self.TILE_SIZE)
             if tile.color is not Color.BLACK:
                 color = pygame.Color(int(tile.color[0] * 0.5), int(tile.color[1] * 0.5), int(tile.color[2] * 0.5))
@@ -155,8 +155,8 @@ class Board():
     def _draw_piece(self, surface: pygame.Surface):
         for cell in range(0, 15):
             if cell in self.active_piece.get_shape(self.active_orientation):
-                grid_col = self.active_origin[0] + int((cell % 4))
-                grid_row = self.active_origin[1] + int((cell / 4))
+                grid_col = self.active_origin[0] + (cell % 4)
+                grid_row = self.active_origin[1] + (cell // 4)
                 x = (grid_col * self.TILE_SIZE) + self.grid_origin[0]
                 y = (grid_row * self.TILE_SIZE) + self.grid_origin[1]
                 rect = pygame.Rect(x, y, self.TILE_SIZE, self.TILE_SIZE)
@@ -169,8 +169,8 @@ class Board():
         preview_piece = self.bag.peek()
         for cell in range(0, 15):
             if cell in preview_piece.get_shape(0):
-                grid_col = self.preview_origin[0] + int((cell % 4))
-                grid_row = self.preview_origin[1] + int((cell / 4))
+                grid_col = self.preview_origin[0] + (cell % 4)
+                grid_row = self.preview_origin[1] + (cell // 4)
                 x = (grid_col * self.TILE_PREVIEW_SIZE) + self.grid_origin[0]
                 y = (grid_row * self.TILE_PREVIEW_SIZE) + self.grid_origin[1]
                 rect = pygame.Rect(x + 125, y + 15, self.TILE_PREVIEW_SIZE, self.TILE_PREVIEW_SIZE)
