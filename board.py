@@ -9,6 +9,7 @@ from dog_leg_rt import DogLegRt
 from ess import Ess
 from heading import Heading
 from i_beam import IBeam
+from score import Score
 from shape import Shape
 from square import Square
 from tee import Tee
@@ -30,9 +31,12 @@ class Board():
         self.grid_origin = (self.INSET, 0 - self.TILE_SIZE)
         self.boarder_coords = (self.INSET, self.INSET, 320, 642)
         preview_coords = ((2 * size[0] // 3) + self.INSET, self.INSET, 125, 125)
+        self.level_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 10)
+        self.lines_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 30)
+        self.score_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 50)
         self.boarder = pygame.Rect(self.boarder_coords)
         self.preview = pygame.Rect(preview_coords)
-        self.level: int = 1
+        self.score = Score()
         self.show_grid_lines = False
         self.grid: List[Tile] = []
         for i in range(0, self.GRID[0] * self.GRID[1]):
@@ -157,6 +161,7 @@ class Board():
         pygame.draw.rect(surface, self.BG_COLOR, self.preview, 2, border_radius=1)
 
         self._draw_piece(surface)
+        self._draw_score(surface)
 
     def _can_rotate(self, col: int, row: int) -> bool:
         can_rotate = True
@@ -198,4 +203,20 @@ class Board():
                 y = (grid_row * self.TILE_SIZE) + self.grid_origin[1]
                 rect = pygame.Rect(x + 1, y + 1, self.TILE_SIZE - 4, self.TILE_SIZE - 4)
                 pygame.draw.rect(surface, self.piece.color, rect)
+
+    def _draw_score(self, surface: pygame.Surface):
+        level_label_text = self.font.render("Level:", True, Color.GREEN)
+        level_text = self.font.render(str(self.score.level), True, Color.WHITE)
+        rect = surface.blit(level_label_text, self.level_label_coords)
+        surface.blit(level_text, (rect.x + rect.width + 5, rect.y))
+
+        lines_label_text = self.font.render("Lines:", True, Color.GREEN)
+        lines_text = self.font.render(str(self.score.lines), True, Color.WHITE)
+        rect = surface.blit(lines_label_text, self.lines_label_coords)
+        surface.blit(lines_text, (rect.x + rect.width + 5, rect.y))
+
+        score_label_text = self.font.render("Score:", True, Color.GREEN)
+        score_text = self.font.render(str(self.score.score), True, Color.WHITE)
+        rect = surface.blit(score_label_text, self.score_label_coords)
+        surface.blit(score_text, (rect.x + rect.width + 5, rect.y))
 
