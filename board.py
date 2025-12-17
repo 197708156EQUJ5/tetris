@@ -30,25 +30,26 @@ class Board():
         self.size = size
         self.font = font
         self.grid_origin = (self.INSET, 0 - self.TILE_SIZE)
-        self.boarder_coords = (self.INSET - 3, self.INSET, 326, 645)
+        self.border_coords = (self.INSET - 3, self.INSET, 326, 645)
         self.preview_coords = ((2 * size[0] // 3) + self.INSET, self.INSET, 125, 125)
         self.level_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 10)
         self.lines_cleared_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 30)
         self.score_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 50)
-        self.boarder = pygame.Rect(self.boarder_coords)
-        self.preview = pygame.Rect(self.preview_coords)
+        self.border_rect = pygame.Rect(self.border_coords)
+        self.preview_rect = pygame.Rect(self.preview_coords)
         self.game_stats = GameStats()
         self.show_grid_lines = False
-        self.grid: List[Tile] = []
-        for i in range(0, self.GRID[0] * self.GRID[1]):
-            self.grid.append(Tile(aid = i))
+        self.cells: List[Tile] = []
+        self.cols, self.rows = self.GRID
+        for i in range(0, self.cols * self.rows):
+            self.cells.append(Tile(aid = i))
 
-        self.current_orientation = 0
-        self.current_piece_origin = (3, 0)
+        self.active_orientation = 0
+        self.active_origin: tuple[int, int] = (3, 0)
         self.preview_origin = (14, 3)
         self.pieces: List[Shape] = []
         self._load_pieces()
-        self.piece = self.pieces.pop(0)
+        self.active_piece = self.pieces.pop(0)
 
     def _load_pieces(self):
         random.shuffle(self.BAG)
@@ -56,26 +57,26 @@ class Board():
             self.pieces.append(shape)
 
     def set_new_piece(self):
-        color = self.piece.color
-        x = self.current_piece_origin[0]
-        y = self.current_piece_origin[1]
-        for cell in self.piece.get_shape(self.current_orientation):
+        color = self.active_piece.color
+        x = self.active_origin[0]
+        y = self.active_origin[1]
+        for cell in self.active_piece.get_shape(self.active_orientation):
             col = (cell % 4) + x
             row = (int(cell / 4)) + y
-            self.grid[row * self.GRID[0] + col].color = color
+            self.cells[row * self.cols + col].color = color
 
         if len(self.pieces) < 2:
             self._load_pieces()
 
-        self.piece = self.pieces.pop(0)
-        self.current_piece_origin = (3, 0)
+        self.active_piece = self.pieces.pop(0)
+        self.active_origin = (3, 0)
 
     def toggle_grid_lines(self):
         self.show_grid_lines = not self.show_grid_lines
 
     def move(self, direction: Direction = Direction.DOWN) -> bool:
-        x = self.current_piece_origin[0]
-        y = self.current_piece_origin[1]
+        x = self.active_origin[0]
+        y = self.active_origin[1]
         if direction == Direction.LEFT:
             x -= 1
         elif direction == Direction.RIGHT:
@@ -84,26 +85,26 @@ class Board():
             y += 1
 
         candidate_piece_origin = (x, y)
-        for cell in self.piece.get_shape(self.current_orientation):
+        for cell in self.active_piece.get_shape(self.active_orientation):
             col = (cell % 4) + x
             row = (int(cell / 4)) + y
             if not self._can_move(col, row):
                 return False
 
-        self.current_piece_origin = candidate_piece_origin
+        self.active_origin = candidate_piece_origin
         return True
 
     def _can_move(self, col: int, row: int) -> bool:
         can_move = True
-        if col < 0 or col > 9:
+        if col < 0 or col >= self.cols:
             can_move = False
-        if row >= self.GRID[1]:
+        if row >= self.rows:
             can_move = False
 
         i: int = 0
-        for tile in self.grid:
-            tile_col = (i % self.GRID[0])
-            tile_row = int(i / self.GRID[0])
+        for tile in self.cells:
+            tile_col = i % self.cols
+            tile_row = i // self.cols
             if tile_col == col and tile_row == row and not tile.is_empty():
                 can_move = False
             i += 1
@@ -111,7 +112,7 @@ class Board():
         return can_move
 
     def rotate(self, heading: Heading = Heading.CW):
-        orientation = self.current_orientation
+        orientation = self.active_orientation
         if heading == Heading.CCW:
             orientation += 1
             orientation %= 4
@@ -119,21 +120,21 @@ class Board():
             orientation -= 1
             orientation %= 4
 
-        x = self.current_piece_origin[0]
-        y = self.current_piece_origin[1]
-        for cell in self.piece.get_shape(orientation):
+        x = self.active_origin[0]
+        y = self.active_origin[1]
+        for cell in self.active_piece.get_shape(orientation):
             col = (cell % 4) + x
             row = (int(cell / 4)) + y
             if not self._can_rotate(col, row):
                 return 
         
-        self.current_orientation = orientation 
+        self.active_orientation = orientation 
 
     def remove_lines(self):
         delete_rows: List[int] = []
         col_counter = 0
 
-        for i, cell in enumerate(self.grid):
+        for i, cell in enumerate(self.cells):
             col = i % 10
             row = i // 10
 
@@ -146,7 +147,7 @@ class Board():
                     delete_rows.append(row)
 
         temp_grid: List[Tile] = []
-        for i, cell in enumerate(self.grid):
+        for i, cell in enumerate(self.cells):
             row = int(i / 10)
             if not row in delete_rows:
                 temp_grid.append(cell)
@@ -154,19 +155,19 @@ class Board():
         for _ in range(0, len(delete_rows) * 10):
             temp_grid.insert(0, Tile())
 
-        self.grid = temp_grid
+        self.cells = temp_grid
 
     def _can_rotate(self, col: int, row: int) -> bool:
         can_rotate = True
-        if col < 0 or col > 9:
+        if col < 0 or col >= self.cols:
             can_rotate = False
-        if row >= self.GRID[1]:
+        if row >= self.rows:
             can_rotate = False
 
         i: int = 0
-        for tile in self.grid:
-            tile_col = (i % self.GRID[0])
-            tile_row = int(i / self.GRID[0])
+        for tile in self.cells:
+            tile_col = (i % self.cols)
+            tile_row = int(i / self.cols)
             if tile_col == col and tile_row == row and not tile.is_empty():
                 can_rotate = False
             i += 1
@@ -176,8 +177,8 @@ class Board():
     def draw(self, surface: pygame.Surface):
         self._draw_cells(surface)
 
-        pygame.draw.rect(surface, self.BG_COLOR, self.boarder, 2, border_radius=1)
-        pygame.draw.rect(surface, self.BG_COLOR, self.preview, 2, border_radius=1)
+        pygame.draw.rect(surface, self.BG_COLOR, self.border_rect, 2, border_radius=1)
+        pygame.draw.rect(surface, self.BG_COLOR, self.preview_rect, 2, border_radius=1)
 
         self._draw_piece(surface)
         self._draw_preview(surface)
@@ -185,10 +186,10 @@ class Board():
 
     def _draw_cells(self, surface: pygame.Surface):
         i: int = 0
-        for tile in self.grid:
-            x = (i % self.GRID[0]) * self.TILE_SIZE + self.INSET
-            y = ((int(i / self.GRID[0])) * self.TILE_SIZE) - self.TILE_SIZE
-            tile_count = int(i / self.GRID[0])
+        for tile in self.cells:
+            x = (i % self.cols) * self.TILE_SIZE + self.INSET
+            y = ((i // self.cols) * self.TILE_SIZE) - self.TILE_SIZE
+            tile_count = int(i / self.cols)
             rect = pygame.Rect(x, y, self.TILE_SIZE, self.TILE_SIZE)
             if tile.color is not Color.BLACK:
                 color = pygame.Color(int(tile.color[0] * 0.5), int(tile.color[1] * 0.5), int(tile.color[2] * 0.5))
@@ -201,16 +202,16 @@ class Board():
 
     def _draw_piece(self, surface: pygame.Surface):
         for cell in range(0, 15):
-            if cell in self.piece.get_shape(self.current_orientation):
-                grid_col = self.current_piece_origin[0] + int((cell % 4))
-                grid_row = self.current_piece_origin[1] + int((cell / 4))
+            if cell in self.active_piece.get_shape(self.active_orientation):
+                grid_col = self.active_origin[0] + int((cell % 4))
+                grid_row = self.active_origin[1] + int((cell / 4))
                 x = (grid_col * self.TILE_SIZE) + self.grid_origin[0]
                 y = (grid_row * self.TILE_SIZE) + self.grid_origin[1]
                 rect = pygame.Rect(x, y, self.TILE_SIZE, self.TILE_SIZE)
-                piece_color = self.piece.color
+                piece_color = self.active_piece.color
                 color = pygame.Color(int(piece_color[0] * 0.5), int(piece_color[1] * 0.5), int(piece_color[2] * 0.5))
                 pygame.draw.rect(surface, color, rect)
-                pygame.draw.rect(surface, self.piece.color, rect, 2, border_radius=2)
+                pygame.draw.rect(surface, self.active_piece.color, rect, 2, border_radius=2)
 
     def _draw_preview(self, surface: pygame.Surface):
         preview_piece = self.pieces[0]
