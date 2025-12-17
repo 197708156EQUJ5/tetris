@@ -1,21 +1,14 @@
 import pygame
-import random
 from typing import List
 
 from color import Color
 from direction import Direction
-from dog_leg_lf import DogLegLf
-from dog_leg_rt import DogLegRt
-from ess import Ess
-from heading import Heading
-from i_beam import IBeam
 from game_stats import GameStats
-from shape import Shape
-from square import Square
-from tee import Tee
-from tile import Tile
-from zee import Zee
 from grid import Grid
+from heading import Heading
+from piece_bag import PieceBag
+from shape import Shape
+from tile import Tile
 
 class Board():
 
@@ -25,7 +18,6 @@ class Board():
     GRID = (10, 22)
     TILE_SIZE = 32
     TILE_PREVIEW_SIZE = 24
-    BAG: List[Shape] = [DogLegRt(), DogLegLf(), Square(), Zee(), Tee(), Ess(), IBeam()]
 
     def __init__(self, size: tuple, font):
         self.size = size
@@ -46,14 +38,8 @@ class Board():
         self.active_orientation = 0
         self.active_origin: tuple[int, int] = (3, 0)
         self.preview_origin = (14, 3)
-        self.pieces: List[Shape] = []
-        self._load_pieces()
-        self.active_piece = self.pieces.pop(0)
-
-    def _load_pieces(self):
-        random.shuffle(self.BAG)
-        for shape in self.BAG:
-            self.pieces.append(shape)
+        self.bag: PieceBag = PieceBag()
+        self.active_piece = self.bag.next()
 
     def set_new_piece(self):
         color = self.active_piece.color
@@ -64,10 +50,7 @@ class Board():
             row = (int(cell / 4)) + y
             self.grid.set_cell_color(col, row, color)
 
-        if len(self.pieces) < 2:
-            self._load_pieces()
-
-        self.active_piece = self.pieces.pop(0)
+        self.active_piece = self.bag.next()
         self.active_origin = (3, 0)
 
     def toggle_grid_lines(self):
@@ -183,7 +166,7 @@ class Board():
                 pygame.draw.rect(surface, self.active_piece.color, rect, 2, border_radius=2)
 
     def _draw_preview(self, surface: pygame.Surface):
-        preview_piece = self.pieces[0]
+        preview_piece = self.bag.peek()
         for cell in range(0, 15):
             if cell in preview_piece.get_shape(0):
                 grid_col = self.preview_origin[0] + int((cell % 4))
