@@ -31,12 +31,11 @@ class App:
 
         self.clock = pygame.time.Clock()
         self.is_running = True
-        self.font = pygame.font.SysFont("monospace", 16)
         self.elapsed_time = 0.0
         self.display_time = 0.0
         self.time_accumulator = 0.0
 
-        self.board = Board((self.WIDTH, self.HEIGHT), self.font)
+        self.board = Board((self.WIDTH, self.HEIGHT))
 
     def run(self):
         while self.is_running:
