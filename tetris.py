@@ -91,8 +91,8 @@ class App:
             self.board.toggle_grid_lines()
 
         if not can_move:
-            self.board.remove_lines()
             self.board.set_new_piece()
+            self.board.remove_lines()
 
     def handle_mouse_down(self, event: pygame.event.Event):
         # Shell: editor/app mouse handling goes here

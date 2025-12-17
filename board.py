@@ -18,7 +18,7 @@ from zee import Zee
 
 class Board():
 
-    BG_COLOR = (0, 255, 0)
+    BG_COLOR = (10, 10, 200)
     INSET = 30
     LEVEL_SPEED: List[float] = [0.8, 0.7, 0.6, 0.5]
     GRID = (10, 22)
@@ -29,7 +29,7 @@ class Board():
         self.size = size
         self.font = font
         self.grid_origin = (self.INSET, 0 - self.TILE_SIZE)
-        self.boarder_coords = (self.INSET, self.INSET, 320, 642)
+        self.boarder_coords = (self.INSET - 3, self.INSET, 326, 645)
         preview_coords = ((2 * size[0] // 3) + self.INSET, self.INSET, 125, 125)
         self.level_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 10)
         self.lines_label_coords = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 30)
@@ -154,15 +154,6 @@ class Board():
 
         self.grid = temp_grid
 
-    def draw(self, surface: pygame.Surface):
-        self._draw_cells(surface)
-
-        pygame.draw.rect(surface, self.BG_COLOR, self.boarder, 2, border_radius=1)
-        pygame.draw.rect(surface, self.BG_COLOR, self.preview, 2, border_radius=1)
-
-        self._draw_piece(surface)
-        self._draw_score(surface)
-
     def _can_rotate(self, col: int, row: int) -> bool:
         can_rotate = True
         if col < 0 or col > 9:
@@ -180,6 +171,15 @@ class Board():
         
         return can_rotate
 
+    def draw(self, surface: pygame.Surface):
+        self._draw_cells(surface)
+
+        pygame.draw.rect(surface, self.BG_COLOR, self.boarder, 2, border_radius=1)
+        pygame.draw.rect(surface, self.BG_COLOR, self.preview, 2, border_radius=1)
+
+        self._draw_piece(surface)
+        self._draw_score(surface)
+
     def _draw_cells(self, surface: pygame.Surface):
         i: int = 0
         for tile in self.grid:
@@ -188,7 +188,9 @@ class Board():
             tile_count = int(i / self.GRID[0])
             rect = pygame.Rect(x, y, self.TILE_SIZE, self.TILE_SIZE)
             if tile.color is not Color.BLACK:
-                pygame.draw.rect(surface, tile.color, rect)
+                color = pygame.Color(int(tile.color[0] * 0.5), int(tile.color[1] * 0.5), int(tile.color[2] * 0.5))
+                pygame.draw.rect(surface, color, rect)
+                pygame.draw.rect(surface, tile.color, rect, 2, border_radius=2)
             if self.show_grid_lines:
                 pygame.draw.rect(surface, Color.WHITE, rect, 1, border_radius=1)
 
@@ -201,8 +203,11 @@ class Board():
                 grid_row = self.current_piece_origin[1] + int((cell / 4))
                 x = (grid_col * self.TILE_SIZE) + self.grid_origin[0]
                 y = (grid_row * self.TILE_SIZE) + self.grid_origin[1]
-                rect = pygame.Rect(x + 1, y + 1, self.TILE_SIZE - 4, self.TILE_SIZE - 4)
-                pygame.draw.rect(surface, self.piece.color, rect)
+                rect = pygame.Rect(x, y, self.TILE_SIZE, self.TILE_SIZE)
+                piece_color = self.piece.color
+                color = pygame.Color(int(piece_color[0] * 0.5), int(piece_color[1] * 0.5), int(piece_color[2] * 0.5))
+                pygame.draw.rect(surface, color, rect)
+                pygame.draw.rect(surface, self.piece.color, rect, 2, border_radius=2)
 
     def _draw_score(self, surface: pygame.Surface):
         level_label_text = self.font.render("Level:", True, Color.GREEN)
