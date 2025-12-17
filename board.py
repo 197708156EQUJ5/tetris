@@ -15,6 +15,7 @@ from square import Square
 from tee import Tee
 from tile import Tile
 from zee import Zee
+from grid import Grid
 
 class Board():
 
@@ -39,10 +40,8 @@ class Board():
         self.preview_rect = pygame.Rect(self.preview_coords)
         self.game_stats = GameStats()
         self.show_grid_lines = False
-        self.cells: List[Tile] = []
         self.cols, self.rows = self.GRID
-        for i in range(0, self.cols * self.rows):
-            self.cells.append(Tile(aid = i))
+        self.grid = Grid(self.cols, self.rows)
 
         self.active_orientation = 0
         self.active_origin: tuple[int, int] = (3, 0)
@@ -63,7 +62,7 @@ class Board():
         for cell in self.active_piece.get_shape(self.active_orientation):
             col = (cell % 4) + x
             row = (int(cell / 4)) + y
-            self.cells[row * self.cols + col].color = color
+            self.grid.set_cell_color(col, row, color)
 
         if len(self.pieces) < 2:
             self._load_pieces()
@@ -85,56 +84,43 @@ class Board():
             y += 1
 
         candidate_piece_origin = (x, y)
-        for cell in self.active_piece.get_shape(self.active_orientation):
-            col = (cell % 4) + x
-            row = (int(cell / 4)) + y
-            if not self._can_move(col, row):
-                return False
+        if not self._can_place(self.active_piece, (x, y), self.active_orientation):
+            return False
 
         self.active_origin = candidate_piece_origin
         return True
 
-    def _can_move(self, col: int, row: int) -> bool:
-        can_move = True
-        if col < 0 or col >= self.cols:
-            can_move = False
-        if row >= self.rows:
-            can_move = False
-
-        i: int = 0
-        for tile in self.cells:
-            tile_col = i % self.cols
-            tile_row = i // self.cols
-            if tile_col == col and tile_row == row and not tile.is_empty():
-                can_move = False
-            i += 1
-        
-        return can_move
-
     def rotate(self, heading: Heading = Heading.CW):
         orientation = self.active_orientation
         if heading == Heading.CCW:
-            orientation += 1
-            orientation %= 4
+            orientation = (orientation + 1) % 4
         elif heading == Heading.CW:
-            orientation -= 1
-            orientation %= 4
+            orientation = (orientation - 1) % 4
 
-        x = self.active_origin[0]
-        y = self.active_origin[1]
-        for cell in self.active_piece.get_shape(orientation):
-            col = (cell % 4) + x
-            row = (int(cell / 4)) + y
-            if not self._can_rotate(col, row):
-                return 
+        x, y = self.active_origin
         
-        self.active_orientation = orientation 
+        if not self._can_place(self.active_piece, (x, y), orientation):
+            return False
+
+        self.active_orientation = orientation
+        return True
+
+    def _can_place(self, shape: Shape, origin: tuple[int, int], orientation: int) -> bool:
+        ox, oy = origin
+        for cell in shape.get_shape(orientation):
+            col = ox + (cell % 4)
+            row = oy + (cell // 4)
+            if not self.grid.in_bounds(col, row):
+                return False
+            if not self.grid.is_empty(col, row):
+                return False
+        return True
 
     def remove_lines(self):
         delete_rows: List[int] = []
         col_counter = 0
 
-        for i, cell in enumerate(self.cells):
+        for i, cell in enumerate(self.grid.cells):
             col = i % 10
             row = i // 10
 
@@ -147,7 +133,7 @@ class Board():
                     delete_rows.append(row)
 
         temp_grid: List[Tile] = []
-        for i, cell in enumerate(self.cells):
+        for i, cell in enumerate(self.grid.cells):
             row = int(i / 10)
             if not row in delete_rows:
                 temp_grid.append(cell)
@@ -155,24 +141,7 @@ class Board():
         for _ in range(0, len(delete_rows) * 10):
             temp_grid.insert(0, Tile())
 
-        self.cells = temp_grid
-
-    def _can_rotate(self, col: int, row: int) -> bool:
-        can_rotate = True
-        if col < 0 or col >= self.cols:
-            can_rotate = False
-        if row >= self.rows:
-            can_rotate = False
-
-        i: int = 0
-        for tile in self.cells:
-            tile_col = (i % self.cols)
-            tile_row = int(i / self.cols)
-            if tile_col == col and tile_row == row and not tile.is_empty():
-                can_rotate = False
-            i += 1
-        
-        return can_rotate
+        self.grid.cells = temp_grid
 
     def draw(self, surface: pygame.Surface):
         self._draw_cells(surface)
@@ -186,7 +155,7 @@ class Board():
 
     def _draw_cells(self, surface: pygame.Surface):
         i: int = 0
-        for tile in self.cells:
+        for tile in self.grid.cells:
             x = (i % self.cols) * self.TILE_SIZE + self.INSET
             y = ((i // self.cols) * self.TILE_SIZE) - self.TILE_SIZE
             tile_count = int(i / self.cols)
