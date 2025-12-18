@@ -17,19 +17,16 @@ class Board():
     LEVEL_SPEED: List[float] = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.075, 0.05, 0.025]
 
     def __init__(self, size: tuple):
-        self.size = size
         self.game_stats = GameStats()
-        self.show_shadow = True
         self.grid = Grid()
-        self.renderer = BoardRenderer(size=self.size, cols=self.grid.cols, rows=self.grid.rows)
+        self.renderer = BoardRenderer(size=size, cols=self.grid.cols, rows=self.grid.rows)
 
         self.bag: PieceBag = PieceBag()
         self._create_new_shape()
 
     def set_new_piece(self):
         color = self.active_piece.shape.color
-        x = self.active_piece.origin[0]
-        y = self.active_piece.origin[1]
+        x, y = self.active_piece.origin
         for cell in self.active_piece.shape.get_shape(self.active_piece.orientation):
             col = (cell % 4) + x
             row = (cell // 4) + y
@@ -45,11 +42,10 @@ class Board():
         self.shadow_piece = Piece(self.shadow_shape, (3, self.grid.rows - 2), 0)
 
     def toggle_shadow(self):
-        self.show_shadow = not self.show_shadow
+        self.renderer.toggle_shadow()
 
     def move(self, direction: Direction = Direction.DOWN) -> bool:
-        x = self.active_piece.origin[0]
-        y = self.active_piece.origin[1]
+        x, y = self.active_piece.origin
         if direction == Direction.LEFT:
             x -= 1
         elif direction == Direction.RIGHT:
@@ -65,8 +61,7 @@ class Board():
         return True
 
     def find_shadow_pos(self):
-        x = self.active_piece.origin[0]
-        y = self.active_piece.origin[1]
+        x, y = self.active_piece.origin
         
         while self._can_place(self.shadow_piece.shape, (x, y), self.shadow_piece.orientation):
             y += 1
@@ -130,5 +125,5 @@ class Board():
 
     def draw(self, surface: pygame.Surface):
         self.renderer.draw(surface, cells=self.grid.cells, active_piece=self.active_piece, shadow_piece=self.shadow_piece, 
-            next_piece=self.bag.peek(), stats=self.game_stats, show_shadow=self.show_shadow)
+            next_piece=self.bag.peek(), stats=self.game_stats)
 

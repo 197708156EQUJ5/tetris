@@ -19,6 +19,7 @@ class BoardRenderer:
         self.font = pygame.font.SysFont("monospace", 16)
         self.cols = cols
         self.rows = rows
+        self._show_shadow = True
         self.border_coords = (self.INSET - 3, self.INSET, 326, 645)
         self.border_rect = pygame.Rect(self.border_coords)
         self.preview_coords = ((2 * size[0] // 3) + self.INSET, self.INSET, 125, 125)
@@ -30,13 +31,16 @@ class BoardRenderer:
         # Layout / rects (you can pass these in instead if you prefer)
         self.grid_origin_px = (self.INSET, 0 - self.TILE_SIZE)
 
+    def toggle_shadow(self):
+        self._show_shadow = not self._show_shadow
+
     def draw(self, surface: pygame.Surface, cells: List[Tile], active_piece: Piece, shadow_piece: Piece, 
-        next_piece: Shape, stats: GameStats, show_shadow: bool=True):
+        next_piece: Shape, stats: GameStats):
         self._draw_cells(surface, cells)
         pygame.draw.rect(surface, self.BG_COLOR, self.border_rect, 2, border_radius=1)
         pygame.draw.rect(surface, self.BG_COLOR, self.preview_rect, 2, border_radius=1)
 
-        if show_shadow:
+        if self._show_shadow:
             self._draw_shadow_piece(surface, shadow_piece)
         self._draw_active_piece(surface, active_piece)
         self._draw_preview(surface, next_piece)
