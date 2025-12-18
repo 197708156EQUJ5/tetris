@@ -115,6 +115,7 @@ class Board():
             temp_grid.insert(0, Tile())
 
         self.grid.cells = temp_grid
+        self.game_stats.on_lines_cleared(len(delete_rows))
 
     def draw(self, surface: pygame.Surface):
         self.renderer.draw(surface, cells=self.grid.cells, active_piece=self.active_piece, active_origin=self.active_origin,
