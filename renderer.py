@@ -31,13 +31,14 @@ class BoardRenderer:
         self.grid_origin_px = (self.INSET, 0 - self.TILE_SIZE)
 
     def draw(self, surface: pygame.Surface, cells: List[Tile], active_piece: Piece, shadow_piece: Piece, 
-        next_piece: Shape, stats:  GameStats):
+        next_piece: Shape, stats: GameStats, show_shadow: bool=True):
         self._draw_cells(surface, cells)
         pygame.draw.rect(surface, self.BG_COLOR, self.border_rect, 2, border_radius=1)
         pygame.draw.rect(surface, self.BG_COLOR, self.preview_rect, 2, border_radius=1)
 
+        if show_shadow:
+            self._draw_shadow_piece(surface, shadow_piece)
         self._draw_active_piece(surface, active_piece)
-        self._draw_shadow_piece(surface, shadow_piece)
         self._draw_preview(surface, next_piece)
         self._draw_stats(surface, stats)
 

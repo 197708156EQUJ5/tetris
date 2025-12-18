@@ -24,7 +24,7 @@ class Board():
 
         self.renderer = BoardRenderer(size=self.size, cols=self.cols, rows=self.rows)
         
-        self.show_grid_lines = False
+        self.show_shadow = True
         self.grid = Grid(self.cols, self.rows)
 
         self.bag: PieceBag = PieceBag()
@@ -32,7 +32,7 @@ class Board():
         self.active_piece: Piece = Piece(shape)
         self.shadow_shape = shape.clone()
         self.shadow_shape.set_shadow()
-        self.shadow_piece = Piece(self.shadow_shape, (3, self.rows - 1), 0)
+        self.shadow_piece = Piece(self.shadow_shape, (3, self.rows - 2), 0)
 
     def set_new_piece(self):
         color = self.active_piece.shape.color
@@ -47,10 +47,10 @@ class Board():
         self.active_piece = Piece(shape)
         self.shadow_shape = shape.clone()
         self.shadow_shape.set_shadow()
-        self.shadow_piece = Piece(self.shadow_shape, (3, self.rows - 1), 0)
+        self.shadow_piece = Piece(self.shadow_shape, (3, self.rows - 2), 0)
 
-    def toggle_grid_lines(self):
-        self.show_grid_lines = not self.show_grid_lines
+    def toggle_shadow(self):
+        self.show_shadow = not self.show_shadow
 
     def move(self, direction: Direction = Direction.DOWN) -> bool:
         x = self.active_piece.origin[0]
@@ -69,6 +69,15 @@ class Board():
         self.active_piece.origin = candidate_piece_origin
         return True
 
+    def find_shadow_pos(self):
+        x = self.active_piece.origin[0]
+        y = self.active_piece.origin[1]
+        
+        while self._can_place(self.shadow_piece.shape, (x, y), self.shadow_piece.orientation):
+            y += 1
+       
+        self.shadow_piece.origin = (x, y - 1)
+
     def rotate(self, heading: Heading = Heading.CW):
         orientation = self.active_piece.orientation
         if heading == Heading.CCW:
@@ -82,8 +91,9 @@ class Board():
             return False
 
         self.active_piece.orientation = orientation
+        self.shadow_piece.orientation = orientation
         return True
-
+   
     def _can_place(self, shape: Shape, origin: tuple[int, int], orientation: int) -> bool:
         ox, oy = origin
         for cell in shape.get_shape(orientation):
@@ -125,5 +135,5 @@ class Board():
 
     def draw(self, surface: pygame.Surface):
         self.renderer.draw(surface, cells=self.grid.cells, active_piece=self.active_piece, shadow_piece=self.shadow_piece, 
-            next_piece=self.bag.peek(), stats=self.game_stats)
+            next_piece=self.bag.peek(), stats=self.game_stats, show_shadow=self.show_shadow)
 

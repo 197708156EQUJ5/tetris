@@ -51,6 +51,7 @@ class App:
                 if not can_move:
                     self.board.set_new_piece()
                     self.board.remove_lines()
+            self.board.find_shadow_pos()
             
             self.handle_events()
             self.draw()
@@ -87,7 +88,7 @@ class App:
         elif event.key == pygame.K_s:
             self.board.rotate(Heading.CW)
         elif event.key == pygame.K_g:
-            self.board.toggle_grid_lines()
+            self.board.toggle_shadow()
 
         if not can_move:
             self.board.set_new_piece()
