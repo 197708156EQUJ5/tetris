@@ -30,8 +30,9 @@ class BoardRenderer:
         self.lines_cleared_label_pos = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 30)
         self.score_label_pos = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 50)
 
-        self.menu_rect = pygame.Rect(self.border_rect.x + 40, self.border_rect.y + 75, 
-            self.border_rect.width - 80, 200)
+        self.game_over_rect = pygame.Rect((0, 0), (int(self.border_rect.w * 0.75), int(self.border_rect.h * 0.25)))
+        self.game_over_rect.centerx = self.border_rect.centerx
+        self.game_over_rect.centery = self.border_rect.centery - int(self.border_rect.h * 0.10)
 
         # Layout / rects (you can pass these in instead if you prefer)
         self.grid_origin_px = (self.INSET, 0 - self.TILE_SIZE)
@@ -54,9 +55,11 @@ class BoardRenderer:
             self._draw_active_piece(surface, active_piece)
             self._draw_preview(surface, next_piece)
         else:
-            pygame.draw.rect(surface, Color.BLACK, self.menu_rect)
-            label = self.game_over_font.render("Game Over!", True, Color.RED)
-            surface.blit(label, (self.menu_rect.x + 10, self.menu_rect.y + 90))
+            pygame.draw.rect(surface, Color.BLACK, self.game_over_rect)
+            text_surf = self.game_over_font.render("Game Over!", True, Color.RED)
+            text_rect = text_surf.get_rect()
+            text_rect.center = self.game_over_rect.center
+            surface.blit(text_surf, text_rect)
 
         self._draw_stats(surface, stats)
 
