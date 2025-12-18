@@ -17,9 +17,11 @@ class BoardRenderer:
 
     def __init__(self, size: tuple, cols: int, rows: int):
         self.font = pygame.font.SysFont("monospace", 16)
+        self.game_over_font = pygame.font.SysFont("arial", 40)
         self.cols = cols
         self.rows = rows
         self._show_shadow = True
+        self._is_game_over = False
         self.border_coords = (self.INSET - 3, self.INSET, 326, 645)
         self.border_rect = pygame.Rect(self.border_coords)
         self.preview_coords = ((2 * size[0] // 3) + self.INSET, self.INSET, 125, 125)
@@ -28,11 +30,17 @@ class BoardRenderer:
         self.lines_cleared_label_pos = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 30)
         self.score_label_pos = ((2 * size[0] // 3) + self.INSET, self.INSET + 125 + 50)
 
+        self.menu_rect = pygame.Rect(self.border_rect.x + 40, self.border_rect.y + 75, 
+            self.border_rect.width - 80, 200)
+
         # Layout / rects (you can pass these in instead if you prefer)
         self.grid_origin_px = (self.INSET, 0 - self.TILE_SIZE)
 
     def toggle_shadow(self):
         self._show_shadow = not self._show_shadow
+        
+    def set_game_over(self, value=True):
+        self._is_game_over = value
 
     def draw(self, surface: pygame.Surface, cells: List[Tile], active_piece: Piece, shadow_piece: Piece, 
         next_piece: Shape, stats: GameStats):
@@ -40,10 +48,16 @@ class BoardRenderer:
         pygame.draw.rect(surface, self.BG_COLOR, self.border_rect, 2, border_radius=1)
         pygame.draw.rect(surface, self.BG_COLOR, self.preview_rect, 2, border_radius=1)
 
-        if self._show_shadow:
-            self._draw_shadow_piece(surface, shadow_piece)
-        self._draw_active_piece(surface, active_piece)
-        self._draw_preview(surface, next_piece)
+        if not self._is_game_over:
+            if self._show_shadow:
+                self._draw_shadow_piece(surface, shadow_piece)
+            self._draw_active_piece(surface, active_piece)
+            self._draw_preview(surface, next_piece)
+        else:
+            pygame.draw.rect(surface, Color.BLACK, self.menu_rect)
+            label = self.game_over_font.render("Game Over!", True, Color.RED)
+            surface.blit(label, (self.menu_rect.x + 10, self.menu_rect.y + 90))
+
         self._draw_stats(surface, stats)
 
     def _shade(self, rgb, factor: float = 0.5) -> pygame.Color:
@@ -77,7 +91,6 @@ class BoardRenderer:
                 fill = self._shade(piece.shape.color, 0.35)
                 outline = self._shade(piece.shape.color, 0.5)
                 pygame.draw.rect(surface, fill, rect)
-                #pygame.draw.rect(surface, piece.shape.color, rect, 2, border_radius=2)
                 pygame.draw.rect(surface, outline, rect, 2, border_radius=2)
 
     def _draw_active_piece(self, surface: pygame.Surface, piece: Piece):

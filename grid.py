@@ -1,3 +1,4 @@
+import random
 from typing import List
 
 from color import Color
@@ -7,11 +8,16 @@ class Grid:
 
     GRID = (10, 22)
 
-    def __init__(self):
+    def __init__(self, fill_random=False):
         self._cols, self._rows = self.GRID
         self._cells: List[Tile] = []
+        color_list = [Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.ORANGE, Color.LT_BLUE, Color.PURPLE]
         for i in range(self._cols * self._rows):
-           self._cells.append(Tile(aid=1))
+            if fill_random:
+                color = random.choice(color_list[1:])
+            else:
+                color = Color.BLACK
+            self._cells.append(Tile(color=color, aid=1))
 
     def index(self, col: int, row: int) -> int:
         return row * self._cols + col

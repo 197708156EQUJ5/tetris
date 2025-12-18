@@ -43,13 +43,15 @@ class App:
             self.elapsed_time += dt
             self.time_accumulator += dt
 
-            if self.time_accumulator >= self.board.get_level_speed():
+            if self.time_accumulator >= self.board.get_level_speed() and \
+                not self.board.is_game_over():
                 self.display_time = int(self.elapsed_time)
                 self.time_accumulator = 0.0
                 can_move = self.board.move(Direction.DOWN)
 
                 if not can_move:
-                    self.board.set_new_piece()
+                    if not self.board.set_new_piece():
+                        self.board.set_game_over()
                     self.board.remove_lines()
             self.board.find_shadow_pos()
             

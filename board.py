@@ -19,10 +19,18 @@ class Board():
     def __init__(self, size: tuple):
         self.game_stats = GameStats()
         self.grid = Grid()
+        self.menu_grid = Grid(True)
         self.renderer = BoardRenderer(size=size, cols=self.grid.cols, rows=self.grid.rows)
+        self._is_game_over = False
 
         self.bag: PieceBag = PieceBag()
         self._create_new_shape()
+    
+    def is_game_over(self):
+        return self._is_game_over
+        
+    def set_game_over(self, value=True):
+        self._is_game_over = value
 
     def get_level_speed(self):
         return self.LEVEL_SPEED[self.game_stats.level]
@@ -36,6 +44,11 @@ class Board():
             self.grid.set_cell_color(col, row, color)
 
         self._create_new_shape()
+        
+        if not self._can_place(self.active_piece.shape, (x, y), self.active_piece.orientation):
+            return False
+
+        return True
 
     def _create_new_shape(self):
         shape: Shape = self.bag.next()
@@ -126,6 +139,10 @@ class Board():
         self.game_stats.on_lines_cleared(len(delete_rows))
 
     def draw(self, surface: pygame.Surface):
-        self.renderer.draw(surface, cells=self.grid.cells, active_piece=self.active_piece, shadow_piece=self.shadow_piece, 
+        grid = self.grid
+        if self._is_game_over:
+            grid = self.menu_grid
+            self.renderer.set_game_over()
+        self.renderer.draw(surface, cells=grid.cells, active_piece=self.active_piece, shadow_piece=self.shadow_piece, 
             next_piece=self.bag.peek(), stats=self.game_stats)
 

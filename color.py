@@ -9,4 +9,3 @@ class Color():
     LT_BLUE = (173, 216, 230)
     PURPLE = (128, 0, 128)
     WHITE = (255, 255, 255)
-    SHADOW_WHITE = (100, 150, 200)
