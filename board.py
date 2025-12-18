@@ -41,7 +41,6 @@ class Board():
         shape: Shape = self.bag.next()
         self.active_piece = Piece(shape)
         self.shadow_shape = shape.clone()
-        self.shadow_shape.set_shadow()
         self.shadow_piece = Piece(self.shadow_shape, (3, self.grid.rows - 2), 0)
 
     def toggle_shadow(self):

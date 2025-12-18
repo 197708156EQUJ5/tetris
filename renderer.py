@@ -75,8 +75,10 @@ class BoardRenderer:
                 rect = pygame.Rect(x, y, self.TILE_SIZE, self.TILE_SIZE)
 
                 fill = self._shade(piece.shape.color, 0.35)
+                outline = self._shade(piece.shape.color, 0.5)
                 pygame.draw.rect(surface, fill, rect)
-                pygame.draw.rect(surface, piece.shape.color, rect, 2, border_radius=2)
+                #pygame.draw.rect(surface, piece.shape.color, rect, 2, border_radius=2)
+                pygame.draw.rect(surface, outline, rect, 2, border_radius=2)
 
     def _draw_active_piece(self, surface: pygame.Surface, piece: Piece):
         ox, oy = piece.origin

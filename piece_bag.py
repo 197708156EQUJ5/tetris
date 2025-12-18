@@ -12,9 +12,21 @@ class PieceBag:
         random.shuffle(self.bag)
 
     def next(self) -> Shape:
-        if len(self.bag) < 2:
+        if len(self.bag) == 0:
             self._refill()
         return self.bag.pop(0)
 
     def peek(self) -> Shape:
+        if len(self.bag) == 0:
+            self._refill()
         return self.bag[0]
+
+    def __str__(self):
+        printstr = []
+        for shape in self.bag:
+            printstr.append(f"{shape}")
+
+        printstr.append(f" {len(self.bag)}")
+
+        return str(printstr)
+
