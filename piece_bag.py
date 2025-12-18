@@ -1,13 +1,6 @@
 import random
 
-from dog_leg_lf import DogLegLf
-from dog_leg_rt import DogLegRt
-from ess import Ess
-from i_beam import IBeam
-from shape import Shape
-from square import Square
-from tee import Tee
-from zee import Zee
+from shapes import Shape, IShape, JShape, LShape, OShape, SShape, TShape, ZShape
 
 class PieceBag:
     def __init__(self):
@@ -15,7 +8,7 @@ class PieceBag:
         self._refill()
 
     def _refill(self):
-        self.bag = [DogLegRt(), DogLegLf(), Square(), Zee(), Tee(), Ess(), IBeam()]
+        self.bag = [IShape(), JShape(), LShape(), OShape(), SShape(), TShape(), ZShape()]
         random.shuffle(self.bag)
 
     def next(self) -> Shape:

@@ -1,9 +1,9 @@
 from typing import List
 
 from color import Color
-from shape import Shape
+from .shape import Shape
 
-class IBeam(Shape):
+class IShape(Shape):
 
     SHAPE: List[List[int]] = [[0, 4, 8, 12], [0, 1, 2, 3], [0, 4, 8, 12], [0, 1, 2, 3]]
 

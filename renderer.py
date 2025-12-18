@@ -2,9 +2,9 @@ import pygame
 from typing import List, Tuple
 
 from color import Color
-from shape import Shape
-from tile import Tile
 from game_stats import GameStats
+from shapes import Shape
+from tile import Tile
 
 class BoardRenderer:
 

@@ -1,14 +1,14 @@
 import pygame
 from typing import List
 
-from renderer import BoardRenderer
 from color import Color
 from direction import Direction
 from game_stats import GameStats
 from grid import Grid
 from heading import Heading
 from piece_bag import PieceBag
-from shape import Shape
+from renderer import BoardRenderer
+from shapes import Shape
 from tile import Tile
 
 class Board():

@@ -1,9 +1,9 @@
 from typing import List
 
 from color import Color
-from shape import Shape
+from .shape import Shape
 
-class Square(Shape):
+class OShape(Shape):
 
     SHAPE: List[List[int]] = [[0, 1, 4, 5], [0, 1, 4, 5], [0, 1, 4, 5], [0, 1, 4, 5]]
 

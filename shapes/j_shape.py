@@ -1,9 +1,9 @@
 from typing import List
 
 from color import Color
-from shape import Shape
+from .shape import Shape
 
-class DogLegRt(Shape):
+class JShape(Shape):
 
     SHAPE: List[List[int]] = [[0, 1, 4, 8], [0, 4, 5, 6], [1, 5, 8, 9], [0, 1, 2, 6]]
 

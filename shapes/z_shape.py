@@ -1,9 +1,9 @@
 from typing import List
 
 from color import Color
-from shape import Shape
+from .shape import Shape
 
-class Zee(Shape):
+class ZShape(Shape):
 
     SHAPE: List[List[int]] = [[0, 1, 5, 6], [1, 4, 5, 8], [0, 1, 5, 6], [1, 4, 5, 8]]
 

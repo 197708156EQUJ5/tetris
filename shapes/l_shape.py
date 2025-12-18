@@ -1,9 +1,9 @@
 from typing import List
 
 from color import Color
-from shape import Shape
+from .shape import Shape
 
-class DogLegLf(Shape):
+class LShape(Shape):
 
     SHAPE: List[List[int]] = [[0, 1, 5, 9], [0, 1, 2, 4], [0, 4, 8, 9], [2, 4, 5, 6]]
 
