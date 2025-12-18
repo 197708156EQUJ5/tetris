@@ -7,7 +7,9 @@ class Grid:
     def __init__(self, cols: int, rows: int):
         self.cols = cols
         self.rows = rows
-        self._cells = [Tile(aid=i) for i in range(cols * rows)]
+        self._cells: List[Tile] = []
+        for i in range(cols * rows):
+           self._cells.append(Tile(aid=1))
 
     def index(self, col: int, row: int) -> int:
         return row * self.cols + col

@@ -9,7 +9,7 @@ class GameStats():
 
     def __init__(self):
         self._level: int = 0
-        self._lines_cleared: int = 9
+        self._lines_cleared: int = 0
         self._score: int = 0
 
     def on_lines_cleared(self, count: int=1):

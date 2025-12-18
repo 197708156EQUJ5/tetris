@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 from color import Color
 from game_stats import GameStats
+from piece import Piece
 from shapes import Shape
 from tile import Tile
 
@@ -29,13 +30,13 @@ class BoardRenderer:
         # Layout / rects (you can pass these in instead if you prefer)
         self.grid_origin_px = (self.INSET, 0 - self.TILE_SIZE)
 
-    def draw(self, surface: pygame.Surface, cells: List[Tile], active_piece: Shape, active_origin: Tuple[int, int], 
-        active_orientation: int, next_piece: Shape, show_grid_lines: bool, stats:  GameStats):
+    def draw(self, surface: pygame.Surface, cells: List[Tile], active_piece: Piece, next_piece: Shape, 
+        show_grid_lines: bool, stats:  GameStats):
         self._draw_cells(surface, cells, show_grid_lines)
         pygame.draw.rect(surface, self.BG_COLOR, self.border_rect, 2, border_radius=1)
         pygame.draw.rect(surface, self.BG_COLOR, self.preview_rect, 2, border_radius=1)
 
-        self._draw_active_piece(surface, active_piece, active_origin, active_orientation)
+        self._draw_active_piece(surface, active_piece)
         self._draw_preview(surface, next_piece)
         self._draw_stats(surface, stats)
 
@@ -59,10 +60,10 @@ class BoardRenderer:
             if show_grid_lines:
                 pygame.draw.rect(surface, Color.WHITE, rect, 1, border_radius=1)
 
-    def _draw_active_piece(self, surface: pygame.Surface, piece: Shape, origin: Tuple[int, int], orientation: int):
+    def _draw_ghost_piece(self, surface: pygame.Surface, piece: Shape, origin: Tuple[int, int], orientation: int):
         ox, oy = origin
         for cell in range(16):
-            if cell in piece.get_shape(orientation):
+            if cell in piece.get_shape(piece.orientation):
                 col = ox + (cell % 4)
                 row = oy + (cell // 4)
 
@@ -74,7 +75,23 @@ class BoardRenderer:
                 pygame.draw.rect(surface, fill, rect)
                 pygame.draw.rect(surface, piece.color, rect, 2, border_radius=2)
 
-    def _draw_preview(self, surface: pygame.Surface, piece: Shape):
+    def _draw_active_piece(self, surface: pygame.Surface, piece: Piece):
+        ox, oy = piece.origin
+        print(f"{piece.shape}")
+        for cell in range(16):
+            if cell in piece.shape.get_shape(piece.orientation):
+                col = ox + (cell % 4)
+                row = oy + (cell // 4)
+
+                x = (col * self.TILE_SIZE) + self.grid_origin_px[0]
+                y = (row * self.TILE_SIZE) + self.grid_origin_px[1]
+                rect = pygame.Rect(x, y, self.TILE_SIZE, self.TILE_SIZE)
+
+                fill = self._shade(piece.shape.color, 0.5)
+                pygame.draw.rect(surface, fill, rect)
+                pygame.draw.rect(surface, piece.shape.color, rect, 2, border_radius=2)
+
+    def _draw_preview(self, surface: pygame.Surface, shape: Shape):
         ox, oy = self.PREVIEW_ORIGIN
 
         # center inside preview_rect (simple version)
@@ -82,7 +99,7 @@ class BoardRenderer:
         base_y = self.preview_rect.y + 10
 
         for cell in range(16):
-            if cell in piece.get_shape(0):
+            if cell in shape.get_shape(0):
                 col = ox + (cell % 4)
                 row = oy + (cell // 4)
 
@@ -90,9 +107,9 @@ class BoardRenderer:
                 y = base_y + (row * self.PREVIEW_TILE_SIZE)
                 rect = pygame.Rect(x, y, self.PREVIEW_TILE_SIZE, self.PREVIEW_TILE_SIZE)
 
-                fill = self._shade(piece.color, 0.5)
+                fill = self._shade(shape.color, 0.5)
                 pygame.draw.rect(surface, fill, rect)
-                pygame.draw.rect(surface, piece.color, rect, 2, border_radius=2)
+                pygame.draw.rect(surface, shape.color, rect, 2, border_radius=2)
 
     def _draw_stats(self, surface: pygame.Surface, stats):
         level_label = self.font.render("Level:", True, Color.GREEN)

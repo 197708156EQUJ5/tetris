@@ -16,6 +16,9 @@ class Shape():
     def color(self) -> Color:
         return self._color
 
+    def set_shadow(self, is_shadow: bool=True):
+        self._color = Color.SHADOW_WHITE
+
     def __str__(self):
         return f"{self.__class__.__name__}"
 

@@ -6,6 +6,7 @@ from direction import Direction
 from game_stats import GameStats
 from grid import Grid
 from heading import Heading
+from piece import Piece
 from piece_bag import PieceBag
 from renderer import BoardRenderer
 from shapes import Shape
@@ -26,29 +27,32 @@ class Board():
         self.show_grid_lines = False
         self.grid = Grid(self.cols, self.rows)
 
-        self.active_orientation = 0
-        self.active_origin: tuple[int, int] = (3, 0)
+        self.shadow_origin: tuple[int, int] = (3, self.rows - 1)
         self.bag: PieceBag = PieceBag()
-        self.active_piece = self.bag.next()
+        shape: Shape = self.bag.next()
+        self.active_piece: Piece = Piece(shape)
+        self.shadow_shape = shape
+        self.shadow_shape.set_shadow()
+        self.shadow_piece = Piece(self.shadow_shape, (3, self.rows - 1), 0)
 
     def set_new_piece(self):
-        color = self.active_piece.color
-        x = self.active_origin[0]
-        y = self.active_origin[1]
-        for cell in self.active_piece.get_shape(self.active_orientation):
+        color = self.active_piece.shape.color
+        x = self.active_piece.origin[0]
+        y = self.active_piece.origin[1]
+        for cell in self.active_piece.shape.get_shape(self.active_piece.orientation):
             col = (cell % 4) + x
             row = (cell // 4) + y
             self.grid.set_cell_color(col, row, color)
 
-        self.active_piece = self.bag.next()
-        self.active_origin = (3, 0)
+        shape: Shape = self.bag.next()
+        self.active_piece = Piece(shape)
 
     def toggle_grid_lines(self):
         self.show_grid_lines = not self.show_grid_lines
 
     def move(self, direction: Direction = Direction.DOWN) -> bool:
-        x = self.active_origin[0]
-        y = self.active_origin[1]
+        x = self.active_piece.origin[0]
+        y = self.active_piece.origin[1]
         if direction == Direction.LEFT:
             x -= 1
         elif direction == Direction.RIGHT:
@@ -57,25 +61,25 @@ class Board():
             y += 1
 
         candidate_piece_origin = (x, y)
-        if not self._can_place(self.active_piece, (x, y), self.active_orientation):
+        if not self._can_place(self.active_piece.shape, (x, y), self.active_piece.orientation):
             return False
 
-        self.active_origin = candidate_piece_origin
+        self.active_piece.origin = candidate_piece_origin
         return True
 
     def rotate(self, heading: Heading = Heading.CW):
-        orientation = self.active_orientation
+        orientation = self.active_piece.orientation
         if heading == Heading.CCW:
             orientation = (orientation + 1) % 4
         elif heading == Heading.CW:
             orientation = (orientation - 1) % 4
 
-        x, y = self.active_origin
+        x, y = self.active_piece.origin
         
-        if not self._can_place(self.active_piece, (x, y), orientation):
+        if not self._can_place(self.active_piece.shape, (x, y), orientation):
             return False
 
-        self.active_orientation = orientation
+        self.active_piece.orientation = orientation
         return True
 
     def _can_place(self, shape: Shape, origin: tuple[int, int], orientation: int) -> bool:
@@ -118,7 +122,6 @@ class Board():
         self.game_stats.on_lines_cleared(len(delete_rows))
 
     def draw(self, surface: pygame.Surface):
-        self.renderer.draw(surface, cells=self.grid.cells, active_piece=self.active_piece, active_origin=self.active_origin,
-            active_orientation=self.active_orientation, next_piece=self.bag.peek(), show_grid_lines=self.show_grid_lines,
-            stats=self.game_stats)
+        self.renderer.draw(surface, cells=self.grid.cells, active_piece=self.active_piece, next_piece=self.bag.peek(), 
+            show_grid_lines=self.show_grid_lines, stats=self.game_stats)
 
