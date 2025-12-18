@@ -13,9 +13,6 @@ from tile import Tile
 
 class Board():
 
-    INSET = 30
-    TILE_SIZE = 32
-    TILE_PREVIEW_SIZE = 24
     LEVEL_SPEED: List[float] = [0.8, 0.7, 0.6, 0.5]
     GRID = (10, 22)
 

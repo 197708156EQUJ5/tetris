@@ -12,7 +12,7 @@ class BoardRenderer:
     INSET = 30
     TILE_SIZE = 32
     PREVIEW_TILE_SIZE = 24
-    PREVIEW_ORIGIN = (14, 3)
+    PREVIEW_ORIGIN = (1, 1)
 
     def __init__(self, size: tuple, cols: int, rows: int):
         self.font = pygame.font.SysFont("monospace", 16)
