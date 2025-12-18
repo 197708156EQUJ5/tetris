@@ -14,25 +14,17 @@ from tile import Tile
 
 class Board():
 
-    LEVEL_SPEED: List[float] = [0.8, 0.7, 0.6, 0.5]
-    GRID = (10, 22)
+    LEVEL_SPEED: List[float] = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.075, 0.05, 0.025]
 
     def __init__(self, size: tuple):
         self.size = size
         self.game_stats = GameStats()
-        self.cols, self.rows = self.GRID
-
-        self.renderer = BoardRenderer(size=self.size, cols=self.cols, rows=self.rows)
-        
         self.show_shadow = True
-        self.grid = Grid(self.cols, self.rows)
+        self.grid = Grid()
+        self.renderer = BoardRenderer(size=self.size, cols=self.grid.cols, rows=self.grid.rows)
 
         self.bag: PieceBag = PieceBag()
-        shape: Shape = self.bag.next()
-        self.active_piece: Piece = Piece(shape)
-        self.shadow_shape = shape.clone()
-        self.shadow_shape.set_shadow()
-        self.shadow_piece = Piece(self.shadow_shape, (3, self.rows - 2), 0)
+        self._create_new_shape()
 
     def set_new_piece(self):
         color = self.active_piece.shape.color
@@ -43,11 +35,14 @@ class Board():
             row = (cell // 4) + y
             self.grid.set_cell_color(col, row, color)
 
+        self._create_new_shape()
+
+    def _create_new_shape(self):
         shape: Shape = self.bag.next()
         self.active_piece = Piece(shape)
         self.shadow_shape = shape.clone()
         self.shadow_shape.set_shadow()
-        self.shadow_piece = Piece(self.shadow_shape, (3, self.rows - 2), 0)
+        self.shadow_piece = Piece(self.shadow_shape, (3, self.grid.rows - 2), 0)
 
     def toggle_shadow(self):
         self.show_shadow = not self.show_shadow
