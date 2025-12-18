@@ -27,11 +27,10 @@ class Board():
         self.show_grid_lines = False
         self.grid = Grid(self.cols, self.rows)
 
-        self.shadow_origin: tuple[int, int] = (3, self.rows - 1)
         self.bag: PieceBag = PieceBag()
         shape: Shape = self.bag.next()
         self.active_piece: Piece = Piece(shape)
-        self.shadow_shape = shape
+        self.shadow_shape = shape.clone()
         self.shadow_shape.set_shadow()
         self.shadow_piece = Piece(self.shadow_shape, (3, self.rows - 1), 0)
 
@@ -46,6 +45,9 @@ class Board():
 
         shape: Shape = self.bag.next()
         self.active_piece = Piece(shape)
+        self.shadow_shape = shape.clone()
+        self.shadow_shape.set_shadow()
+        self.shadow_piece = Piece(self.shadow_shape, (3, self.rows - 1), 0)
 
     def toggle_grid_lines(self):
         self.show_grid_lines = not self.show_grid_lines
@@ -122,6 +124,6 @@ class Board():
         self.game_stats.on_lines_cleared(len(delete_rows))
 
     def draw(self, surface: pygame.Surface):
-        self.renderer.draw(surface, cells=self.grid.cells, active_piece=self.active_piece, next_piece=self.bag.peek(), 
-            show_grid_lines=self.show_grid_lines, stats=self.game_stats)
+        self.renderer.draw(surface, cells=self.grid.cells, active_piece=self.active_piece, shadow_piece=self.shadow_piece, 
+            next_piece=self.bag.peek(), stats=self.game_stats)
 

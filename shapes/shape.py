@@ -19,6 +19,9 @@ class Shape():
     def set_shadow(self, is_shadow: bool=True):
         self._color = Color.SHADOW_WHITE
 
+    def clone(self) -> "Shape":
+        return Shape(shape_lists = self.shape_lists, color = self._color)
+
     def __str__(self):
         return f"{self.__class__.__name__}"
 
