@@ -24,6 +24,9 @@ class Board():
         self.bag: PieceBag = PieceBag()
         self._create_new_shape()
 
+    def get_level_speed(self):
+        return self.LEVEL_SPEED[self.game_stats.level]
+
     def set_new_piece(self):
         color = self.active_piece.shape.color
         x, y = self.active_piece.origin

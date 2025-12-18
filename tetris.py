@@ -43,7 +43,7 @@ class App:
             self.elapsed_time += dt
             self.time_accumulator += dt
 
-            if self.time_accumulator >= 1.0:
+            if self.time_accumulator >= self.board.get_level_speed():
                 self.display_time = int(self.elapsed_time)
                 self.time_accumulator = 0.0
                 can_move = self.board.move(Direction.DOWN)
