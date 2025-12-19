@@ -9,6 +9,7 @@ from heading import Heading
 from piece import Piece
 from piece_bag import PieceBag
 from renderer import BoardRenderer
+from menu_renderer import MenuRenderer
 from shapes import Shape
 from tile import Tile
 from utils import GameState
@@ -23,8 +24,9 @@ class Board():
         self.grid = Grid()
         self.menu_grid = Grid(True)
         self.renderer = BoardRenderer(size=size, cols=self.grid.cols, rows=self.grid.rows)
-        self._game_state: GameState = GameState.PLAY
-
+        self.menu_renderer = MenuRenderer(size)
+        self._game_state: GameState = GameState.MENU
+        self._is_paused_menu = False
         self.bag: PieceBag = PieceBag()
         self._create_new_shape()
 
@@ -37,6 +39,23 @@ class Board():
 
     def set_game_state(self, value=GameState.MENU):
         self._game_state = value
+        if self._game_state == GameState.MENU:
+            self.menu_grid = Grid(True)
+
+    def new_game(self):
+        self.game_stats = GameStats()
+        self.grid = Grid()
+        self.bag = PieceBag()
+        self._create_new_shape()
+        self.set_game_state(GameState.PLAY)
+
+    @property
+    def is_paused_menu(self) -> bool:
+        return self._is_paused_menu
+
+    @property
+    def game_state(self) -> GameState:
+        return self._game_state
 
     def get_level_speed(self):
         return self.LEVEL_SPEED[self.game_stats.level]
@@ -149,10 +168,11 @@ class Board():
 
     def draw(self, surface: pygame.Surface):
         grid = self.grid
-        if self._game_state == GameState.DONE:
-#            grid = self.menu_grid
-            self.renderer.set_game_state(GameState.DONE)
+        if self._game_state == GameState.DONE or self._game_state == GameState.PLAY:
+            if self._game_state == GameState.DONE:
+                self.renderer.set_game_state(GameState.DONE)
 
-        self.renderer.draw(surface, cells=grid.cells, active_piece=self.active_piece, shadow_piece=self.shadow_piece, 
-            next_piece=self.bag.peek(), stats=self.game_stats)
-
+            self.renderer.draw(surface, cells=grid.cells, active_piece=self.active_piece, shadow_piece=self.shadow_piece, 
+                next_piece=self.bag.peek(), stats=self.game_stats)
+        elif self._game_state == GameState.MENU:
+            self.menu_renderer.draw(surface, cells=self.menu_grid.cells, show_resume=self.is_paused_menu)

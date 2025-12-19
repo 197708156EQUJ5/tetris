@@ -47,19 +47,23 @@ class App:
         while self.is_running:
             dt = self.clock.tick(self.FPS) / 1000.0
             self.elapsed_time += dt
-            self.time_accumulator += dt
+            if self.board.game_state == GameState.PLAY and not self.board.is_game_over():
+                self.time_accumulator += dt
 
-            if self.time_accumulator >= self.board.get_level_speed() and \
-                not self.board.is_game_over():
-                self.display_time = int(self.elapsed_time)
+                if self.time_accumulator >= self.board.get_level_speed():
+                    self.display_time = int(self.elapsed_time)
+                    self.time_accumulator = 0.0
+                    can_move = self.board.move(Direction.DOWN)
+
+                    if not can_move:
+                        if not self.board.set_new_piece():
+                            self.board.set_game_state(GameState.DONE)
+                        self.board.remove_lines()
+            else:
                 self.time_accumulator = 0.0
-                can_move = self.board.move(Direction.DOWN)
 
-                if not can_move:
-                    if not self.board.set_new_piece():
-                        self.board.set_game_state(GameState.DONE)
-                    self.board.remove_lines()
-            self.board.find_shadow_pos()
+            if self.board.game_state == GameState.PLAY:
+                self.board.find_shadow_pos()
             
             self.handle_events()
             self.draw()
@@ -84,6 +88,40 @@ class App:
                 self.handle_mouse_down(event)
 
     def handle_key_down(self, event: pygame.event.Event):
+        # Toggle pause/menu
+        if event.key == pygame.K_p:
+            if self.board.game_state == GameState.PLAY:
+                self.board._is_paused_menu = True
+                self.board.set_game_state(GameState.MENU)
+            elif self.board.game_state == GameState.MENU and self.board.is_paused_menu:
+                self.board._is_paused_menu = False
+                self.board.set_game_state(GameState.PLAY)
+            return
+
+        # Menu hotkeys
+        if self.board.game_state == GameState.MENU:
+            if event.key == pygame.K_1:
+                self.board._is_paused_menu = False
+                self.board.new_game()
+                return
+
+            if self.board.is_paused_menu:
+                # Paused menu: 2 = Resume, 4 = Exit
+                if event.key == pygame.K_2:
+                    self.board._is_paused_menu = False
+                    self.board.set_game_state(GameState.PLAY)
+                    return
+                if event.key == pygame.K_4:
+                    self.quit()
+                    return
+            else:
+                # Start menu: 3 = Exit
+                if event.key == pygame.K_3:
+                    self.quit()
+                    return
+
+            return
+        
         can_move = True
         if event.key == pygame.K_LEFT:
             self.board.move(Direction.LEFT)
