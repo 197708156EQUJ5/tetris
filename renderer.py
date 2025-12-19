@@ -7,6 +7,7 @@ from game_stats import GameStats
 from piece import Piece
 from shapes import Shape
 from tile import Tile
+from utils.resources import Utils
 
 class BoardRenderer:
 
@@ -16,8 +17,9 @@ class BoardRenderer:
     PREVIEW_TILE_SIZE = 24
     PREVIEW_ORIGIN = (1, 1)
 
-    BASE_DIR = Path(__file__).resolve().parent
-    FONT_PATH = BASE_DIR / "assets" / "fonts" / "ttf" / "JetBrainsMono-Regular.ttf"
+#    BASE_DIR = Path(__file__).resolve().parent
+#    FONT_PATH = BASE_DIR / "assets" / "fonts" / "ttf" / "JetBrainsMono-Regular.ttf"
+    FONT_PATH = Utils.resource_path("assets/fonts/ttf/JetBrainsMono-Regular.ttf")
 
     def __init__(self, size: tuple, cols: int, rows: int):
         self.font = pygame.font.Font(self.FONT_PATH, 18)

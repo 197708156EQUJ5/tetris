@@ -2,12 +2,18 @@
 
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-
+import warnings
+warnings.filterwarnings(
+    "ignore",
+    message="pkg_resources is deprecated as an API",
+    category=UserWarning,
+)
 import pygame
 
 from board import Board
 from direction import Direction
 from heading import Heading
+from utils.resources import Utils
 
 class App:
     # Class-level constants, no globals
@@ -19,15 +25,15 @@ class App:
     KEY_REPEAT_INTERVAL = 50    # ms
 
     def __init__(self):
-        pygame.init()
 
-        pygame.key.set_repeat(
-            self.KEY_REPEAT_DELAY,
-            self.KEY_REPEAT_INTERVAL
-        )
+        pygame.init()
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("Tetris")
+        app_icon = pygame.image.load(Utils.resource_path("assets/icons/app_icon.png")).convert_alpha()
+        print("icon size:", app_icon.get_size(), "alpha:", app_icon.get_flags() & pygame.SRCALPHA)
+        pygame.display.set_icon(app_icon)
+        pygame.key.set_repeat(self.KEY_REPEAT_DELAY, self.KEY_REPEAT_INTERVAL)
 
         self.clock = pygame.time.Clock()
         self.is_running = True
