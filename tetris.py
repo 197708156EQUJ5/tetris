@@ -121,6 +121,9 @@ class App:
                     return
 
             return
+
+        if self.board.game_state == GameState.DONE:
+            self.board.set_game_state(GameState.MENU)
         
         can_move = True
         if event.key == pygame.K_LEFT:

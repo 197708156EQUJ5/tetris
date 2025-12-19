@@ -48,6 +48,7 @@ class Board():
         self.bag = PieceBag()
         self._create_new_shape()
         self.set_game_state(GameState.PLAY)
+        self.renderer.set_game_state(GameState.PLAY)
 
     @property
     def is_paused_menu(self) -> bool:
