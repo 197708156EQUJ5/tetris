@@ -26,7 +26,6 @@ class BoardRenderer:
         self.cols = cols
         self.rows = rows
         self._show_shadow = True
-        self._is_game_over = False
         self._game_state: GameState = GameState.PLAY
         self.border_coords = (self.INSET - 3, self.INSET, 326, 645)
         self.border_rect = pygame.Rect(self.border_coords)
@@ -47,9 +46,6 @@ class BoardRenderer:
 
     def toggle_shadow(self):
         self._show_shadow = not self._show_shadow
-        
-    def set_game_over(self, value=True):
-        self._is_game_over = value
 
     def set_game_state(self, value=GameState.MENU):
         self._game_state = value
@@ -60,7 +56,6 @@ class BoardRenderer:
         pygame.draw.rect(surface, self.BG_COLOR, self.border_rect, 2, border_radius=1)
         pygame.draw.rect(surface, self.BG_COLOR, self.preview_rect, 2, border_radius=1)
 
-#        if not self._is_game_over:
         if self._game_state == GameState.PLAY:
             if self._show_shadow:
                 self._draw_shadow_piece(surface, shadow_piece)

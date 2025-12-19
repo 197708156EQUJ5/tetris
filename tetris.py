@@ -57,7 +57,6 @@ class App:
 
                 if not can_move:
                     if not self.board.set_new_piece():
-#                        self.board.set_game_over()
                         self.board.set_game_state(GameState.DONE)
                     self.board.remove_lines()
             self.board.find_shadow_pos()
@@ -101,7 +100,6 @@ class App:
 
         if not can_move:
             if not self.board.set_new_piece():
-#                self.board.set_game_over()
                 self.board.set_game_state(GameState.DONE)
             self.board.remove_lines()
 

@@ -23,7 +23,6 @@ class Board():
         self.grid = Grid()
         self.menu_grid = Grid(True)
         self.renderer = BoardRenderer(size=size, cols=self.grid.cols, rows=self.grid.rows)
-        self._is_game_over = False
         self._game_state: GameState = GameState.PLAY
 
         self.bag: PieceBag = PieceBag()
@@ -35,9 +34,6 @@ class Board():
                 if not self.grid.is_empty(col, row):
                     return True
         return False        
-        
-    def set_game_over(self, value=True):
-        self._is_game_over = value
 
     def set_game_state(self, value=GameState.MENU):
         self._game_state = value
@@ -153,10 +149,8 @@ class Board():
 
     def draw(self, surface: pygame.Surface):
         grid = self.grid
-#        if self._is_game_over:
         if self._game_state == GameState.DONE:
 #            grid = self.menu_grid
-            self.renderer.set_game_over()
             self.renderer.set_game_state(GameState.DONE)
 
         self.renderer.draw(surface, cells=grid.cells, active_piece=self.active_piece, shadow_piece=self.shadow_piece, 
