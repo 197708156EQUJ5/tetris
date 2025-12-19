@@ -13,7 +13,8 @@ import pygame
 from board import Board
 from direction import Direction
 from heading import Heading
-from utils.resources import Utils
+from utils import GameState
+from utils import Utils
 
 class App:
     # Class-level constants, no globals
@@ -31,7 +32,6 @@ class App:
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("Tetris")
         app_icon = pygame.image.load(Utils.resource_path("assets/icons/app_icon.png")).convert_alpha()
-        print("icon size:", app_icon.get_size(), "alpha:", app_icon.get_flags() & pygame.SRCALPHA)
         pygame.display.set_icon(app_icon)
         pygame.key.set_repeat(self.KEY_REPEAT_DELAY, self.KEY_REPEAT_INTERVAL)
 
@@ -57,7 +57,8 @@ class App:
 
                 if not can_move:
                     if not self.board.set_new_piece():
-                        self.board.set_game_over()
+#                        self.board.set_game_over()
+                        self.board.set_game_state(GameState.DONE)
                     self.board.remove_lines()
             self.board.find_shadow_pos()
             
@@ -100,7 +101,8 @@ class App:
 
         if not can_move:
             if not self.board.set_new_piece():
-                self.board.set_game_over()
+#                self.board.set_game_over()
+                self.board.set_game_state(GameState.DONE)
             self.board.remove_lines()
 
     def handle_mouse_down(self, event: pygame.event.Event):

@@ -7,7 +7,8 @@ from game_stats import GameStats
 from piece import Piece
 from shapes import Shape
 from tile import Tile
-from utils.resources import Utils
+from utils import GameState
+from utils import Utils
 
 class BoardRenderer:
 
@@ -17,8 +18,6 @@ class BoardRenderer:
     PREVIEW_TILE_SIZE = 24
     PREVIEW_ORIGIN = (1, 1)
 
-#    BASE_DIR = Path(__file__).resolve().parent
-#    FONT_PATH = BASE_DIR / "assets" / "fonts" / "ttf" / "JetBrainsMono-Regular.ttf"
     FONT_PATH = Utils.resource_path("assets/fonts/ttf/JetBrainsMono-Regular.ttf")
 
     def __init__(self, size: tuple, cols: int, rows: int):
@@ -28,6 +27,7 @@ class BoardRenderer:
         self.rows = rows
         self._show_shadow = True
         self._is_game_over = False
+        self._game_state: GameState = GameState.PLAY
         self.border_coords = (self.INSET - 3, self.INSET, 326, 645)
         self.border_rect = pygame.Rect(self.border_coords)
         self.preview_coords = ((2 * size[0] // 3) + self.INSET, self.INSET, 125, 125)
@@ -40,6 +40,8 @@ class BoardRenderer:
         self.game_over_rect.centerx = self.border_rect.centerx
         self.game_over_rect.centery = self.border_rect.centery - int(self.border_rect.h * 0.10)
 
+        self.menu_options_rect = pygame.Rect((0, 0), (int(self.border_rect.w * 0.75), int(self.border_rect.h * 0.55)))
+
         # Layout / rects (you can pass these in instead if you prefer)
         self.grid_origin_px = (self.INSET, 0 - self.TILE_SIZE)
 
@@ -49,18 +51,22 @@ class BoardRenderer:
     def set_game_over(self, value=True):
         self._is_game_over = value
 
+    def set_game_state(self, value=GameState.MENU):
+        self._game_state = value
+
     def draw(self, surface: pygame.Surface, cells: List[Tile], active_piece: Piece, shadow_piece: Piece, 
         next_piece: Shape, stats: GameStats):
         self._draw_cells(surface, cells)
         pygame.draw.rect(surface, self.BG_COLOR, self.border_rect, 2, border_radius=1)
         pygame.draw.rect(surface, self.BG_COLOR, self.preview_rect, 2, border_radius=1)
 
-        if not self._is_game_over:
+#        if not self._is_game_over:
+        if self._game_state == GameState.PLAY:
             if self._show_shadow:
                 self._draw_shadow_piece(surface, shadow_piece)
             self._draw_active_piece(surface, active_piece)
             self._draw_preview(surface, next_piece)
-        else:
+        elif self._game_state == GameState.DONE:
             pygame.draw.rect(surface, Color.BLACK, self.game_over_rect)
             text_surf = self.game_over_font.render("Game Over!", True, Color.RED)
             text_rect = text_surf.get_rect()
