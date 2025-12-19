@@ -13,7 +13,7 @@ class Grid:
         self._cells: List[Tile] = []
         color_list = [Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.ORANGE, Color.LT_BLUE, Color.PURPLE]
         for i in range(self._cols * self._rows):
-            if fill_random:
+            if fill_random and (i // self._cols) >= 2:
                 color = random.choice(color_list[1:])
             else:
                 color = Color.BLACK

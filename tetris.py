@@ -93,7 +93,8 @@ class App:
             self.board.toggle_shadow()
 
         if not can_move:
-            self.board.set_new_piece()
+            if not self.board.set_new_piece():
+                self.board.set_game_over()
             self.board.remove_lines()
 
     def handle_mouse_down(self, event: pygame.event.Event):

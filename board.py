@@ -15,6 +15,7 @@ from tile import Tile
 class Board():
 
     LEVEL_SPEED: List[float] = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.075, 0.05, 0.025]
+    VISIBLE_START_ROW = 2
 
     def __init__(self, size: tuple):
         self.game_stats = GameStats()
@@ -25,9 +26,13 @@ class Board():
 
         self.bag: PieceBag = PieceBag()
         self._create_new_shape()
-    
+
     def is_game_over(self):
-        return self._is_game_over
+        for col in range(self.grid.cols):
+            for row in range(self.VISIBLE_START_ROW):
+                if not self.grid.is_empty(col, row):
+                    return True
+        return False        
         
     def set_game_over(self, value=True):
         self._is_game_over = value
@@ -45,7 +50,10 @@ class Board():
 
         self._create_new_shape()
         
-        if not self._can_place(self.active_piece.shape, (x, y), self.active_piece.orientation):
+        spawn_x, spawn_y = self.active_piece.origin
+        spawn_orientation = self.active_piece.orientation
+
+        if not self._can_place(self.active_piece.shape, (spawn_x, spawn_y), spawn_orientation):
             return False
 
         return True
@@ -141,8 +149,9 @@ class Board():
     def draw(self, surface: pygame.Surface):
         grid = self.grid
         if self._is_game_over:
-            grid = self.menu_grid
+#            grid = self.menu_grid
             self.renderer.set_game_over()
+
         self.renderer.draw(surface, cells=grid.cells, active_piece=self.active_piece, shadow_piece=self.shadow_piece, 
             next_piece=self.bag.peek(), stats=self.game_stats)
 

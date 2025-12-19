@@ -1,4 +1,5 @@
 import pygame
+from pathlib import Path
 from typing import List, Tuple
 
 from color import Color
@@ -15,9 +16,12 @@ class BoardRenderer:
     PREVIEW_TILE_SIZE = 24
     PREVIEW_ORIGIN = (1, 1)
 
+    BASE_DIR = Path(__file__).resolve().parent
+    FONT_PATH = BASE_DIR / "assets" / "fonts" / "ttf" / "JetBrainsMono-Regular.ttf"
+
     def __init__(self, size: tuple, cols: int, rows: int):
-        self.font = pygame.font.SysFont("monospace", 16)
-        self.game_over_font = pygame.font.SysFont("arial", 40)
+        self.font = pygame.font.Font(self.FONT_PATH, 18)
+        self.game_over_font = pygame.font.Font(self.FONT_PATH, 40)
         self.cols = cols
         self.rows = rows
         self._show_shadow = True
